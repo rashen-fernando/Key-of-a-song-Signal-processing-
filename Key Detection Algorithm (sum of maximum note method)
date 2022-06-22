@@ -1,0 +1,46 @@
+import numpy as np
+import librosa
+import librosa.display
+import matplotlib.pyplot as plt
+
+y1, sr = librosa.load("/content/shape-of-you-official-music-video.wav")
+y2, sr = librosa.load("/content/drive/Shareddrives/G-33-2022/Audios/finished/Lily Allen - Everyone's At It - Multitrack/Lily Allen - Everyone's At It - Multitrack/Everyone's At It - Piano.wav")
+
+y=y1#[1:5346243]+y2[1:5346243]
+C = np.abs(librosa.cqt(y, sr=sr))
+
+fig, ax = plt.subplots()
+img = librosa.display.specshow(librosa.amplitude_to_db(C, ref=np.max),
+                               sr=sr, x_axis='time', y_axis='cqt_note', ax=ax)
+ax.set_title('Constant-Q power spectrum')
+fig.colorbar(img, ax=ax, format="%+2.0f dB")
+#-------------------------------------------------------------------------
+maxind  = np.argmax(C,0)
+print(C[-1][maxind])
+array = np.zeros(C.shape)
+for i in range(0,len(maxind)-1):
+  ind = maxind[i]
+  array[ind][i]=C[ind][i]
+  
+print(maxind.shape)
+print(array.shape)
+print(max(array[1]))
+print(max(maxind))
+
+fig, ax = plt.subplots()
+img = librosa.display.specshow(librosa.amplitude_to_db(array, ref=np.max),
+                               sr=sr, x_axis='time', y_axis='cqt_note', ax=ax)
+ax.set_title('Constant-Q power spectrum')
+fig.colorbar(img, ax=ax, format="%+2.0f dB")
+#-------------------------------------------------------------------------
+x = np.sum(array,1)
+keys=np.reshape(x,(7,-1))
+chords = sum(keys,1)
+print(chords.shape)
+index = np.linspace(1,12,12)
+D = np.stack((index,chords),1)
+D=D[D[:,1].argsort()]
+print(chords.shape)
+plt.plot(index,chords)
+plt.show()
+print(D)
